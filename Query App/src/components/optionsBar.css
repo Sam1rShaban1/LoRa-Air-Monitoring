@@ -1,0 +1,27 @@
+.options-bar {
+    background-color: #2f343d; /* Light background color */
+    color: #aaaaaa; /* Text color */
+    padding: 10px; /* Add padding for better appearance */
+    width: 100%; /* Full width of the page */
+    position: fixed; /* Fixed position to always stay at the top */
+    top: 0; /* Align to the top */
+    z-index: 999; /* Ensure it's on top of other elements */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  }
+  
+  .option-button {
+    background-color: transparent; /* Transparent background */
+    color: #ffffff; /* Text color */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    border: none; /* Remove button border */
+    padding: 8px 16px; /* Adjust button padding */
+    margin-right: 10px; /* Add some space between buttons */
+    cursor: pointer; /* Change cursor on hover */
+  }
+  
+  .option-button:hover {
+    color: #aaaaaa; /* Darken text color on hover */
+  }
+  
