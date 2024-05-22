@@ -6,15 +6,13 @@ const Query = ({ publish, sub }) => {
   const [form] = Form.useForm();
   const qosOptions = useContext(QosOption);
 
+
   const onFinish = (values) => {
-    const { qos, node } = values;
+    const { qos, node, payload } = values;
 
     const pubTopic = "from-server/" + node;
     const subTopic = "to-server/" + node;
-
-    console.log(subTopic);
-
-    const pubValues = { ...values, pubTopic };
+    const pubValues = { node, qos, payload , pubTopic };
     const subValues = { subTopic, qos };
 
     sub(subValues);

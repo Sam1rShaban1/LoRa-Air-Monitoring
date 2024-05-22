@@ -9,14 +9,14 @@
 #pragma pack(1)
 
 enum QueryCommand: uint8_t {
-    sOff = 0,
-    sOn = 1
+    services = 0,
+    routes = 1
 };
 
 class QueryMessage: public DataMessageGeneric {
 public:
     QueryCommand queryCommand;
-    u_int32_t queryvalue;
+    uint8_t queryValue;
 
     void serialize(JsonObject& doc) {
         // Call the base class serialize function
@@ -27,9 +27,9 @@ public:
         //doc["flkwsCommand"] = "Test2";
         //doc["query"] = "Test1";
         doc["queryCommand"] = queryCommand;
-        doc["query"] = queryvalue;
+        doc["query"] = queryValue;
         Log.verboseln(F("FF in class QueryMessage: void serialize flkwsCommand %d"),queryCommand );
-        Log.verboseln(F("FF in class QueryMessage: void serialize queryvalue %d"),queryvalue );
+        Log.verboseln(F("FF in class QueryMessage: void serialize queryvalue %d"),queryValue );
         //JsonObject object = doc.to<JsonObject>();
         //JsonObject object = querydata.createNestedObject();
         //object["query"] = queryvalue;
@@ -45,8 +45,8 @@ public:
 
         queryCommand = doc["queryCommand"];
         Log.verboseln(F("FF in class QueryMessage: void deserialize %d"),queryCommand );
-        queryvalue = doc["query"];
-        Log.verboseln(F("FF in class QueryMessage: void deserialize %d"),queryvalue);
+        queryValue = doc["query"];
+        Log.verboseln(F("FF in class QueryMessage: void deserialize %d"),queryValue);
     }
 };
 #pragma pack()

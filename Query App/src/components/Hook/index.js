@@ -64,7 +64,7 @@ const HookMqtt = () => {
       client.on('message', (topic, message) => {
         const payload = { topic, message: message.toString() }
         setPayload(payload)
-        console.log(`received message: ${message} from topic: ${topic}`)
+        // console.log(`received message: ${message} from topic: ${topic}`)
       })
     }
   }, [client])
@@ -98,7 +98,7 @@ const HookMqtt = () => {
           query: payload // Assuming 'payload' is the value of the input field
         }
       });
-
+      console.log(jsonPayload)
       client.publish(pubTopic, jsonPayload, { qos }, (error) => {
         if (error) {
           console.log('Publish error: ', error)
@@ -118,7 +118,7 @@ const HookMqtt = () => {
           console.log('Subscribe to topics error', error)
           return
         }
-        console.log(`Subscribe to topics: ${subTopic}`)
+        // console.log(`Subscribe to topics: ${subTopic}`)
       })
     }
   }

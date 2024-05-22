@@ -19,7 +19,7 @@ String Query::queryOn(uint16_t dst) {
     if (dst == LoraMesher::getInstance().getLocalAddress())
         return queryOn();
 
-    DataMessage* msg = getQueryMessage(QueryCommand::sOn, dst);
+    DataMessage* msg = getQueryMessage(QueryCommand::services, dst);
     MessageManager::getInstance().sendMessage(messagePort::LoRaMeshPort, msg);
 
     delete msg;
@@ -39,7 +39,7 @@ String Query::queryOff(uint16_t dst) {
     if (dst == LoraMesher::getInstance().getLocalAddress())
         return queryOff();
 
-    DataMessage* msg = getQueryMessage(QueryCommand::sOff, dst);
+    DataMessage* msg = getQueryMessage(QueryCommand::routes, dst);
     MessageManager::getInstance().sendMessage(messagePort::LoRaMeshPort, msg);
 
     delete msg;
@@ -101,16 +101,16 @@ void Query::processReceivedMessage(messagePort port, DataMessage* message) {
     Log.infoln(F("FF: Query::processReceivedMessage  perform local actions") );
 
     queryCommandS = queryMessage->queryCommand;   //FF added
-    queryvalueS = queryMessage->queryvalue;    //FF added
+    queryvalueS = queryMessage->queryValue;    //FF added
     
     Log.verboseln(F("FF in Query::processReceivedMessage queryCommandS %d"),queryCommandS );
     Log.verboseln(F("FF in Query::processReceivedMessage queryvalueS %d"),queryvalueS);
 
     switch (queryMessage->queryCommand) {
-        case QueryCommand::sOn:
+        case QueryCommand::services:
             queryOn();
             break;
-        case QueryCommand::sOff:
+        case QueryCommand::routes:
             queryOff();
             break;
         default:
@@ -146,7 +146,7 @@ void Query::createAndSendQuery() {
         message->messageId = queryId++;
 
         message->queryCommand = queryCommandS;   //FF added
-        message->queryvalue = queryvalueS;    //FF added
+        message->queryValue = queryvalueS;    //FF added
 
 
         message->messageSize = messageWithHeaderSize - sizeof(DataMessageGeneric);

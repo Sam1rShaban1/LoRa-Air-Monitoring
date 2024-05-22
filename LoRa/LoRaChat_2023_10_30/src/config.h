@@ -132,7 +132,7 @@
 
 //Monitoring configuration
 #define MONITORING_ENABLED
-#define MONITORING_UPDATE_DELAY 10000 //30000 //10000 //ms   when periodic task
+#define MONITORING_UPDATE_DELAY 90000 //30000 //10000 //ms   when periodic task
 
 //FLKWS
 //#define FLKWS_ENABLED

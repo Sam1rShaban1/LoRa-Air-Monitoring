@@ -7,8 +7,8 @@ const Receiver = ({ payload }) => {
   useEffect(() => {
     if (payload.topic) {
       const messageObject = JSON.parse(payload.message);
-      if (messageObject.data.srcPort == "41") {
-        setMessages(messages => [...messages, payload]);
+      if ("query" in messageObject.data) {
+        setMessages(messages => [...messages, messageObject.data.query]);
       }
     }
     
@@ -18,7 +18,7 @@ const Receiver = ({ payload }) => {
     <List.Item>
       <List.Item.Meta
         title={item.topic}
-        description={item.message}
+        description={item}
       />
     </List.Item>
   );
