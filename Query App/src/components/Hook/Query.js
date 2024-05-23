@@ -6,13 +6,17 @@ const Query = ({ publish, sub }) => {
   const [form] = Form.useForm();
   const qosOptions = useContext(QosOption);
 
+  const handleButtonClick = (payload) => {
+    form.setFieldsValue({ payload });
+    form.submit();
+  };
 
   const onFinish = (values) => {
     const { qos, node, payload } = values;
 
     const pubTopic = "from-server/" + node;
     const subTopic = "to-server/" + node;
-    const pubValues = { node, qos, payload , pubTopic };
+    const pubValues = { node, qos, payload, pubTopic };
     const subValues = { subTopic, qos };
 
     sub(subValues);
@@ -22,9 +26,11 @@ const Query = ({ publish, sub }) => {
   const recordP = {
     node: '',
     qos: 0,
+    payload: '', // This will be set by button clicks
   };
 
   const labelStyle = { color: 'white' }; // Style for labels
+  const buttonStyle = { width: '100%' }; // Style for buttons
 
   const QueryForm = (
     <Form
@@ -53,16 +59,51 @@ const Query = ({ publish, sub }) => {
         </Col>
         <Col span={24}>
           <Form.Item
-            label={<span style={labelStyle}>Query</span>}
             name="payload"
+            hidden
           >
-            <Input.TextArea />
+            <Input type="number" />
           </Form.Item>
         </Col>
-        <Col span={8} offset={16}>
+        <Col span={8}>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Query
+            <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(0)}>
+              Services
+            </Button>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item>
+            <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(1)}>
+              Routes
+            </Button>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item>
+            <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(2)}>
+              Status
+            </Button>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item>
+            <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(3)}>
+              Monitoring Messages
+            </Button>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item>
+            <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(4)}>
+              Query Messages
+            </Button>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item>
+            <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(5)}>
+              Routing Table
             </Button>
           </Form.Item>
         </Col>

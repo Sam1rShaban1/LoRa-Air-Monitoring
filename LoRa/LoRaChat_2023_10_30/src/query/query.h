@@ -59,7 +59,12 @@ private:
     uint8_t queryId = 0;
 
     QueryCommand queryCommandS;
+    uint16_t queryAnswerS;
     u_int32_t queryvalueS;
+
+    int getServices();
+
+    int getRoutingTable();
 
 };
 

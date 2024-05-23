@@ -8,15 +8,20 @@
 
 #pragma pack(1)
 
-enum QueryCommand: uint8_t {
+enum QueryCommand: uint32_t {
     services = 0,
-    routes = 1
+    routes = 1,
+    status = 2,
+    mMessages = 3,
+    qMessages = 4,
+    rTable = 5
 };
 
 class QueryMessage: public DataMessageGeneric {
 public:
     QueryCommand queryCommand;
     uint8_t queryValue;
+    uint16_t queryAnswer;
 
     void serialize(JsonObject& doc) {
         // Call the base class serialize function
@@ -28,6 +33,7 @@ public:
         //doc["query"] = "Test1";
         doc["queryCommand"] = queryCommand;
         doc["query"] = queryValue;
+        doc["queryAns"] = queryAnswer;
         Log.verboseln(F("FF in class QueryMessage: void serialize flkwsCommand %d"),queryCommand );
         Log.verboseln(F("FF in class QueryMessage: void serialize queryvalue %d"),queryValue );
         //JsonObject object = doc.to<JsonObject>();

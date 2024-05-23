@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { List } from 'antd';
+import moment from 'moment'; // Ensure you have moment installed
 
 const Receiver = ({ payload }) => {
   const [messages, setMessages] = useState([]);
@@ -7,26 +8,29 @@ const Receiver = ({ payload }) => {
   useEffect(() => {
     if (payload.topic) {
       const messageObject = JSON.parse(payload.message);
-      if ("query" in messageObject.data) {
-        setMessages(messages => [...messages, messageObject.data.query]);
+      if ("queryAns" in messageObject.data) {
+        const newMessage = {
+          text: `${payload.addrSrc}: ${messageObject.data.queryAns}`,
+          timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
+        };
+        setMessages(messages => [newMessage, ...messages]);
       }
     }
-    
   }, [payload]);
 
   const renderListItem = (item) => (
-    <List.Item>
+    <List.Item style={listItemStyle}>
       <List.Item.Meta
-        title={item.topic}
-        description={item}
+        title={<div style={titleStyle}>{item.text}</div>}
+        description={<div style={descriptionStyle}>{item.timestamp}</div>}
       />
     </List.Item>
   );
 
   return (
     <>
-      <h2>ANSWER</h2>
-      <div style={{ maxHeight: '100%', overflowY: 'scroll' }}>
+      <h2 style={headerStyle}>ANSWER</h2>
+      <div style={listContainerStyle}>
         <List
           size="small"
           bordered
@@ -35,7 +39,39 @@ const Receiver = ({ payload }) => {
         />
       </div>
     </>
-  );  
+  );
+};
+
+// Styles
+const listContainerStyle = {
+  maxHeight: '100%',
+  overflowY: 'scroll',
+  padding: '20px',
+  backgroundColor: '#f0f2f5',
+  borderRadius: '8px',
+};
+
+const listItemStyle = {
+  padding: '10px',
+  backgroundColor: '#ffffff',
+  border: '1px solid #d9d9d9',
+  borderRadius: '8px',
+  marginBottom: '10px',
+};
+
+const titleStyle = {
+  fontWeight: 'bold',
+  fontSize: '16px',
+};
+
+const descriptionStyle = {
+  color: '#595959',
+  fontSize: '14px',
+};
+
+const headerStyle = {
+  textAlign: 'center',
+  marginBottom: '20px',
 };
 
 export default Receiver;

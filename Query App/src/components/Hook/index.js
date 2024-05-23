@@ -118,7 +118,7 @@ const HookMqtt = () => {
           console.log('Subscribe to topics error', error)
           return
         }
-        // console.log(`Subscribe to topics: ${subTopic}`)
+        console.log(`Subscribe to topics: ${subTopic}`)
       })
     }
   }

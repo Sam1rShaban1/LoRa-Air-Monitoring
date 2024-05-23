@@ -97,7 +97,7 @@ DataMessage* Query::getQueryMessage(QueryCommand command, uint16_t dst) {
 
 void Query::processReceivedMessage(messagePort port, DataMessage* message) {
     QueryMessage* queryMessage = (QueryMessage*) message;
-
+    
     Log.infoln(F("FF: Query::processReceivedMessage  perform local actions") );
 
     queryCommandS = queryMessage->queryCommand;   //FF added
@@ -106,12 +106,27 @@ void Query::processReceivedMessage(messagePort port, DataMessage* message) {
     Log.verboseln(F("FF in Query::processReceivedMessage queryCommandS %d"),queryCommandS );
     Log.verboseln(F("FF in Query::processReceivedMessage queryvalueS %d"),queryvalueS);
 
-    switch (queryMessage->queryCommand) {
+    ESP_LOGV(QUERY_TAG, "services 2");
+
+    switch (queryMessage->queryValue) {
         case QueryCommand::services:
-            queryOn();
+            ESP_LOGV(QUERY_TAG, "services");
+            queryAnswerS = getServices();
             break;
         case QueryCommand::routes:
-            queryOff();
+            queryAnswerS = getRoutingTable();
+            break;
+        case QueryCommand::status:
+            queryAnswerS = getRoutingTable();
+            break;
+        case QueryCommand::mMessages:
+            queryAnswerS = getRoutingTable();
+            break;
+        case QueryCommand::qMessages:
+            queryAnswerS = getRoutingTable();
+            break;
+        case QueryCommand::rTable:
+            queryAnswerS = getRoutingTable();
             break;
         default:
             break;
@@ -147,9 +162,8 @@ void Query::createAndSendQuery() {
 
         message->queryCommand = queryCommandS;   //FF added
         message->queryValue = queryvalueS;    //FF added
-
-
         message->messageSize = messageWithHeaderSize - sizeof(DataMessageGeneric);
+        message->queryAnswer = queryAnswerS; 
         //message->gps = GPSService::getInstance().getGPSMessage();
         //message->flSendTimeInterval = FL_UPDATE_DELAY;
 
@@ -171,4 +185,18 @@ void Query::createAndSendQuery() {
     else {
         Log.errorln(F("Failed to allocate memory for query message"));
     }
+}
+
+int Query::getServices(){
+    MessageManager& manager = MessageManager::getInstance();
+    return manager.getActiveServices().size();
+}
+
+
+int Query::getRoutingTable(){
+    LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
+    routingTableList->setInUse();
+    int n = routingTableList->getLength();
+    RouteNode *rtn = routingTableList->getCurrent();
+    return n;
 }

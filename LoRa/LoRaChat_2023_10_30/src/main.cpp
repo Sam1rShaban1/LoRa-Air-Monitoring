@@ -337,23 +337,22 @@ void display_Task(void* pvParameters) {
             // float batteryVoltage = getBatteryVoltage();
             // Given the previous float value, convert it into string with 2 decimal places
             bool isConnected = wiFiService.isConnected() || loraMeshService.hasGateway();
-            String lineOne = "LoRaTRUST-  " + String(isConnected ? "CON" : "NC");
-
+            //bool isConnected = true;
+            //String lineOne = "LoRaTRUST-  " + String(isConnected ? "CON" : "NC");
+            String lineOne = "LoRaMesher-  " + String(isConnected ? "CON" : "NC");
             Screen.changeLineOne(lineOne);
         }
-
         //Update line two every DISPLAY_LINE_TWO_DELAY ms
         if (millis() - lastLineTwoUpdate > DISPLAY_LINE_TWO_DELAY) {
             lastLineTwoUpdate = millis();
             String lineTwo = String(loraMeshService.getLocalAddress(), HEX);
-
             if (wiFiService.isConnected())
                 lineTwo += " | " + wiFiService.getIP();
-
+            //if (1)
+            //    lineTwo += " | 192.168.43.158";
             Screen.changeLineTwo(lineTwo);
         }
-
-#ifdef GPS_ENABLED
+    #ifdef GPS_ENABLED
         //Update line three every DISPLAY_LINE_THREE_DELAY ms
         // if (millis() - lastLineThreeUpdate > DISPLAY_LINE_THREE_DELAY) {
         //     lastLineThreeUpdate = millis();
@@ -361,7 +360,6 @@ void display_Task(void* pvParameters) {
         //     if (lineThree.begin() != "G")
         //         Screen.changeLineThree(lineThree);
         // }
-
         //Update GPS every UPDATE_GPS_DELAY ms
         if (millis() - lastGPSUpdate > UPDATE_GPS_DELAY) {
             lastGPSUpdate = millis();
@@ -369,7 +367,15 @@ void display_Task(void* pvParameters) {
             if (lineThree.startsWith("G") != 1)
                 Screen.changeLineThree(lineThree);
         }
-#endif
+    #endif
+        if (millis() - lastLineFourUpdate > DISPLAY_LINE_FOUR_DELAY) {
+            lastLineFourUpdate = millis();
+            String lineFour; // = "RoutingTable:  ";
+            String rt = loraMeshService.getRoutingTable();
+            if (1)
+                lineFour += rt;
+            Screen.changeLineFour(lineFour);
+        }
 
         Screen.drawDisplay();
         vTaskDelay(DISPLAY_TASK_DELAY / portTICK_PERIOD_MS);
