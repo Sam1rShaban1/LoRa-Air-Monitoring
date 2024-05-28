@@ -4,29 +4,45 @@ This project aims to explore cross-network LoRaMesher applications.
 
 ## Installation
 
-Configure your local EMQX broker and Grafana server with the following commands:
+Install docker:
 
 ```bash
-docker run -d --name emqx -p 1883:1883 -p 8083:8083 -p 8883:8883 -p 8084:8084 -p 18083:18083 emqx/emqx:latest
+sudo apt update
 
-docker run -d -p 3000:3000 --name=grafana grafana/grafana-enterprise
+sudo apt install -y ca-certificates curl gnupg lsb-release
+
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+sudo echo  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+sudo groupadd docker
+
+sudo usermod -aG docker $USER
+```
+
+Install docker compose:
+
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 ## Usage
 
 
-To start the EMQX broker and Grafana server use the following commands:
+To start the Monitoring Services, in the "MonitoringService" folder execute:
 
 ```bash
-docker start emqx
-
-docker start grafana
+docker-compose up -d
 ```
 Credentials for your local emqx broker are user: "admin" password: "local"
 Credentials for your local grafana server are user: "admin" password: "admin"
 
-For the React app install npm and use the following comand in the Query app folder:
-
-```bash
-npm start
-```
+EMQX broker: [a link](http://localhost:18083)
+InfluxDB: [a link](http://localhost:8086)
+Grafana: [a link](http://localhost:3000)
+Query web app: [a link](http://localhost:3006)
