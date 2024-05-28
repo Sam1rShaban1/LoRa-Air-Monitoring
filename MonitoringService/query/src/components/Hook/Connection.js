@@ -1,11 +1,11 @@
 import React from 'react'
 import { Button, Form, Input, Row, Col, Select } from 'antd'
 
-const Connection = ({ connect, disconnect, connectBtn }) => {
+const Connection = ({ connect, disconnect, connectBtn, sub }) => {
   const [form] = Form.useForm()
   const initialConnectionOptions = {
     protocol: 'ws',
-    host: '192.168.1.140',
+    host: 'localhost',
     clientId: 'searchWebApp',
     port: 8083,
     username: '',
@@ -100,7 +100,6 @@ const Connection = ({ connect, disconnect, connectBtn }) => {
       </Button>
     </div>
   )
-  
 }
 
 export default Connection

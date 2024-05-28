@@ -47,7 +47,7 @@ const listContainerStyle = {
   maxHeight: '100%',
   overflowY: 'scroll',
   padding: '20px',
-  backgroundColor: '#f0f2f5',
+  backgroundColor: 'transparent',
   borderRadius: '8px',
 };
 
