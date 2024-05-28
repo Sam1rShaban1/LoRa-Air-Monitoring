@@ -42,7 +42,7 @@ docker-compose up -d
 Credentials for your local emqx broker are user: "admin" password: "local"
 Credentials for your local grafana server are user: "admin" password: "admin"
 
-EMQX broker: [a link](http://localhost:18083)
-InfluxDB: [a link](http://localhost:8086)
-Grafana: [a link](http://localhost:3000)
-Query web app: [a link](http://localhost:3006)
+EMQX broker: [http://localhost:18083]
+InfluxDB: [http://localhost:8086]
+Grafana: [http://localhost:3000]
+Query web app: [http://localhost:3006]
