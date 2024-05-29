@@ -28,7 +28,7 @@ services:
       - DOCKER_INFLUXDB_INIT_USERNAME=root
       - DOCKER_INFLUXDB_INIT_PASSWORD=monitoringservice
       - DOCKER_INFLUXDB_INIT_ORG=TFG
-      - DOCKER_INFLUXDB_INIT_BUCKET=Monitoring
+      - DOCKER_INFLUXDB_INIT_BUCKET=loramesher
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=tfg-iotdata-auth-token
   
   telegraf:
