@@ -40,6 +40,7 @@ Click "Save & test" and the datasource should be successfully added.
 Then create a new dashboard, add a visualization and select the InfluxDB data source.
 After that add the following example query:
 
+```bash
 from(bucket: "loramesher")
   |> range(start: v.timeRangeStart, stop:v.timeRangeStop)
   |> aggregateWindow(every: 1m,fn: mean)
@@ -47,3 +48,4 @@ from(bucket: "loramesher")
     r._measurement == "mqtt_consumer" and 
     r._field == "data_nServices"
   )
+```
