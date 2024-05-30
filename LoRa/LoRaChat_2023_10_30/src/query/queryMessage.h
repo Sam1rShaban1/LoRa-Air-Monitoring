@@ -14,14 +14,16 @@ enum QueryCommand: uint32_t {
     status = 2,
     mMessages = 3,
     qMessages = 4,
-    rTable = 5
+    rTable = 5,
+    rTableGW = 6
 };
 
 class QueryMessage: public DataMessageGeneric {
 public:
     QueryCommand queryCommand;
     uint8_t queryValue;
-    uint16_t queryAnswer;
+    String queryAnswer;
+    String queryPetition;
 
     void serialize(JsonObject& doc) {
         // Call the base class serialize function
@@ -32,7 +34,7 @@ public:
         //doc["flkwsCommand"] = "Test2";
         //doc["query"] = "Test1";
         doc["queryCommand"] = queryCommand;
-        doc["query"] = queryValue;
+        doc["query"] = queryPetition;
         doc["queryAns"] = queryAnswer;
         Log.verboseln(F("FF in class QueryMessage: void serialize flkwsCommand %d"),queryCommand );
         Log.verboseln(F("FF in class QueryMessage: void serialize queryvalue %d"),queryValue );

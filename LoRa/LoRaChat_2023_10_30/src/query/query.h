@@ -59,13 +59,15 @@ private:
     uint8_t queryId = 0;
 
     QueryCommand queryCommandS;
-    uint16_t queryAnswerS;
+    String queryAnswerS;
     u_int32_t queryvalueS;
+    String queryPetitionS;
 
     int getServices();
 
     int getRoutingTable();
 
+    String getRoutingTableNodes();
 };
 
     

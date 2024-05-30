@@ -139,7 +139,7 @@
 #define NN_HIDDEN_NEURONS 8
 
 //ECHO
-#define ECHO_ENABLED
+#define ECHO_DISABLED
 
 //QUERY
 #define QUERY_ENABLED

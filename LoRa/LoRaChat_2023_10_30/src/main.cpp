@@ -279,6 +279,9 @@ void initManager() {
     ESP_LOGV(TAG, "Simulator service added to manager");
 
     Serial.println(manager.getAvailableCommands());
+
+    ESP_LOGV(TAG, "All services added to manager");
+
 }
 
 #pragma endregion
@@ -318,20 +321,24 @@ bool initPMU() {
         PMU = new XPowersAXP2101(PMU_WIRE_PORT);
         if (!PMU->init()) {
             Serial.println("Warning: Failed to find AXP2101 power management");
+            ESP_LOGV(TAG, "Warning: Failed to find AXP2101 power management");
             delete PMU;
             PMU = NULL;
         } else {
             Serial.println("AXP2101 PMU init succeeded, using AXP2101 PMU");
+            ESP_LOGV(TAG, "AXP2101 PMU init succeeded, using AXP2101 PMU");
         }
     }
     if (!PMU) {
         PMU = new XPowersAXP192(PMU_WIRE_PORT);
         if (!PMU->init()) {
             Serial.println("Warning: Failed to find AXP192 power management");
+            ESP_LOGV(TAG, "Warning: Failed to find AXP192 power management");
             delete PMU;
             PMU = NULL;
         } else {
             Serial.println("AXP192 PMU init succeeded, using AXP192 PMU");
+            ESP_LOGV(TAG, "AXP192 PMU init succeeded, using AXP192 PMU");
         }
     }
     if (!PMU) {
@@ -376,6 +383,7 @@ bool initPMU() {
     } else if (PMU->getChipModel() == XPOWERS_AXP2101) {
       /*The alternative version of T-Beam 1.1 differs from T-Beam V1.1 in that it uses an AXP2101 power chip*/
         //Unuse power channel
+        ESP_LOGV(TAG, "AXP2101 PMU detected");
         PMU->disablePowerOutput(XPOWERS_DCDC2);
         PMU->disablePowerOutput(XPOWERS_DCDC3);
         PMU->disablePowerOutput(XPOWERS_DCDC4);
@@ -470,6 +478,7 @@ bool initPMU() {
     // default:
     //     break;
     // }
+    ESP_LOGV(TAG, "finalizing PMU");
     return true;
 }
 
@@ -606,6 +615,13 @@ void setup() {
 
     ESP_LOGV(TAG, "Heap after initManager: %d", ESP.getFreeHeap());
 
+     ESP_LOGV(TAG, "Init PMU") ;
+    if (initPMU()) {
+      ESP_LOGV(TAG, "Init PMU OK") ;
+    } else {
+      ESP_LOGV(TAG, "Init PMU FAILED") ;
+    }
+    
 #ifdef WIFI_ENABLED
     // Initialize WiFi
     initWiFi();

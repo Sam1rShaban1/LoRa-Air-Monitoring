@@ -110,23 +110,32 @@ void Query::processReceivedMessage(messagePort port, DataMessage* message) {
 
     switch (queryMessage->queryValue) {
         case QueryCommand::services:
-            ESP_LOGV(QUERY_TAG, "services");
+            queryPetitionS = "Services";
             queryAnswerS = getServices();
             break;
         case QueryCommand::routes:
+            queryPetitionS = "Routes";
             queryAnswerS = getRoutingTable();
             break;
         case QueryCommand::status:
+            queryPetitionS = "Status";
             queryAnswerS = getRoutingTable();
             break;
         case QueryCommand::mMessages:
+            queryPetitionS = "mMessages";
             queryAnswerS = getRoutingTable();
             break;
         case QueryCommand::qMessages:
+            queryPetitionS = "qMessages";
             queryAnswerS = getRoutingTable();
             break;
         case QueryCommand::rTable:
+            queryPetitionS = "Routing Table";
             queryAnswerS = getRoutingTable();
+            break;
+        case QueryCommand::rTableGW:
+            queryPetitionS = "Routing Table GW";
+            queryAnswerS = getRoutingTableNodes();
             break;
         default:
             break;
@@ -163,6 +172,7 @@ void Query::createAndSendQuery() {
         message->queryCommand = queryCommandS;   //FF added
         message->queryValue = queryvalueS;    //FF added
         message->messageSize = messageWithHeaderSize - sizeof(DataMessageGeneric);
+        message->queryPetition = queryPetitionS; 
         message->queryAnswer = queryAnswerS; 
         //message->gps = GPSService::getInstance().getGPSMessage();
         //message->flSendTimeInterval = FL_UPDATE_DELAY;
@@ -199,4 +209,9 @@ int Query::getRoutingTable(){
     int n = routingTableList->getLength();
     RouteNode *rtn = routingTableList->getCurrent();
     return n;
+}
+
+String Query::getRoutingTableNodes(){
+    String routingTableList = LoRaMeshService::getInstance().getRoutingTable();
+    return routingTableList;
 }

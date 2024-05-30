@@ -113,13 +113,13 @@ const HookMqtt = () => {
           />
         </div>
         <div style={componentStyle}>
-          <VisNodes payload={payload} />
+          <VisNodes payload={payload} publish={mqttPublish}/>
         </div>
       </div>
       <div style={rowStyle}>
         <div style={componentStyle}>
           <QosOption.Provider value={qosOption}>
-            <Query publish={mqttPublish} sub={mqttSub} />
+            <Query publish={mqttPublish} />
           </QosOption.Provider>
         </div>
         <div style={componentStyle}>

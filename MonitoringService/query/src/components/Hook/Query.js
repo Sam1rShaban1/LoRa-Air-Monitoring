@@ -13,13 +13,8 @@ const Query = ({ publish, sub }) => {
 
   const onFinish = (values) => {
     const { qos, node, payload } = values;
-
     const pubTopic = "from-server/" + node;
-    const subTopic = "to-server/" + node;
     const pubValues = { node, qos, payload, pubTopic };
-    const subValues = { subTopic, qos };
-
-    sub(subValues);
     publish(pubValues);
   };
 

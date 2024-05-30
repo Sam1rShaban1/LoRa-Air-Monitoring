@@ -8,12 +8,15 @@ const Receiver = ({ payload }) => {
   useEffect(() => {
     if (payload.topic) {
       const messageObject = JSON.parse(payload.message);
-      if ("queryAns" in messageObject.data) {
+      if ("queryAns" in messageObject.data && messageObject.data.query !== "Routing Table GW") {
         const newMessage = {
-          text: `${payload.addrSrc}: ${messageObject.data.queryAns}`,
+          text: `${messageObject.data.addrSrc}: ${messageObject.data.queryAns} ${messageObject.data.query}`,
           timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
         };
-        setMessages(messages => [newMessage, ...messages]);
+        setMessages(messages => {
+          const updatedMessages = [newMessage, ...messages];
+          return updatedMessages.slice(0, 5); // Keep only the last 5 messages
+        });
       }
     }
   }, [payload]);
@@ -70,7 +73,7 @@ const descriptionStyle = {
 };
 
 const headerStyle = {
-  textAlign: 'center',
+  textAlign: 'left',
   marginBottom: '20px',
 };
 
