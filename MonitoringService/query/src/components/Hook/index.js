@@ -93,6 +93,7 @@ const HookMqtt = () => {
           query: payload
         }
       });
+      console.log(pubTopic, node, payload)
       client.publish(pubTopic, jsonPayload, { qos }, (error) => {
         if (error) {
           console.log('Publish error: ', error);

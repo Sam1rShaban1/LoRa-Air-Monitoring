@@ -194,7 +194,8 @@ void Monitoring::createAndSendMonitoring(){
         message->messageSize = messageWithHeaderSize - sizeof(DataMessageGeneric);
         message->monitoringSendTimeInterval = MONITORING_UPDATE_DELAY;
         message->nServices = getServices();
-        message->nRoutes = getRoutingTable();
+        message->nRoutes = getRoutes();
+        message->routeTable = getRoutingTable();
         MessageManager::getInstance().sendMessage(messagePort::MqttPort, (DataMessage*) message);
 
         free(message);
@@ -234,10 +235,26 @@ int Monitoring::getServices(){
 }
 
 
-int Monitoring::getRoutingTable(){
+String Monitoring::getRoutingTable(){
     LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
+    int thisNodeAdr = LoraMesher::getInstance().getLocalAddress();
+    String routeTable = "No routes";
     routingTableList->setInUse();
-    int n = routingTableList->getLength();
-    RouteNode *rtn = routingTableList->getCurrent();
-    return n;
+    if(routingTableList->getLength() > 0){
+        RouteNode *rtn = routingTableList->getCurrent();
+        routeTable =  "" + rtn->networkNode.address;
+        routeTable =  routeTable + " (" + rtn->networkNode.metric + ") via " + rtn->via;
+    }
+    while (routingTableList->next()){
+        RouteNode *rtn = routingTableList->getCurrent();
+        String auxNode = rtn->networkNode.address + " (" + rtn->networkNode.metric;
+        auxNode = auxNode + + ") via " + rtn->via;
+        routeTable = routeTable + "," + auxNode;
+    }
+    return routeTable;
+}
+
+int Monitoring::getRoutes(){
+    LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
+    return routingTableList->getLength();
 }

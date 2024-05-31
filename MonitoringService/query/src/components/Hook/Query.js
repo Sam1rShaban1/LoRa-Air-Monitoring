@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Form, Input, Row, Col, Button, Select } from 'antd';
 import { QosOption } from './index';
 
-const Query = ({ publish, sub }) => {
+const Query = ({ publish }) => {
   const [form] = Form.useForm();
   const qosOptions = useContext(QosOption);
 

@@ -68,5 +68,7 @@ class Monitoring: public MessageService{
     
     int getServices();
 
-    int getRoutingTable();
+    String getRoutingTable();
+
+    int getRoutes();
 };

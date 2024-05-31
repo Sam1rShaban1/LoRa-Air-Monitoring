@@ -203,15 +203,23 @@ int Query::getServices(){
 }
 
 
-int Query::getRoutingTable(){
+String Query::getRoutingTableNodes(){
     LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
+    int thisNodeAdr = LoraMesher::getInstance().getLocalAddress();
+    String nodes = nodes+thisNodeAdr;
     routingTableList->setInUse();
-    int n = routingTableList->getLength();
-    RouteNode *rtn = routingTableList->getCurrent();
-    return n;
+    if(routingTableList->getLength() == 1){
+        RouteNode *rtn = routingTableList->getCurrent();
+        nodes = nodes + ","+rtn->networkNode.address;
+    }
+    while (routingTableList->next()){
+        RouteNode *rtn = routingTableList->getCurrent();
+        nodes = nodes + "," + rtn->networkNode.address;
+    }
+    return nodes;
 }
 
-String Query::getRoutingTableNodes(){
-    String routingTableList = LoRaMeshService::getInstance().getRoutingTable();
-    return routingTableList;
+int Query::getRoutingTable(){
+    LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
+    return routingTableList->getLength();
 }

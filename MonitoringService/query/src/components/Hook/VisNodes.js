@@ -3,6 +3,7 @@ import { Button, Input } from 'antd';
 
 const VisNodes = ({ payload, publish }) => {
   const [uniqueNodes, setUniqueNodes] = useState(new Set());
+  const [queryNodes, setQueryNodes] = useState([]);
   const nodeTimestamps = useRef(new Map());
   const [showSecondGrid, setShowSecondGrid] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -23,6 +24,12 @@ const VisNodes = ({ payload, publish }) => {
         }
         return prevNodes;
       });
+      if (messageObject.data.query === "Routing Table GW"){
+        const queryString = messageObject.data.queryAns; // Access the query string
+        const queryArray = queryString.split(',').map(Number); // Split by commas and convert to numbers
+        setQueryNodes(queryArray); // Set the queryNodes state
+
+      }
     }
   }, [payload]);
 
@@ -34,13 +41,11 @@ const VisNodes = ({ payload, publish }) => {
       // Check each unique node's last message timestamp
       uniqueNodes.forEach(node => {
         const lastTimestamp = nodeTimestamps.current.get(node);
-        if (currentTime - lastTimestamp <= 120000) { // 2 minutes = 120000 milliseconds
+        if (currentTime - lastTimestamp <= 95000) {
           newNodes.add(node); // Node is still active
-          console.log(`Node ${node} is active.`);
         } else {
           // Node has been inactive for more than 2 minutes, remove it
           nodeTimestamps.current.delete(node);
-          console.log(`Node ${node} is inactive and removed.`);
         }
       });
 
@@ -82,15 +87,17 @@ const VisNodes = ({ payload, publish }) => {
                   <Input placeholder="Enter GW" value={inputValue} onChange={handleInputChange} />
                   <Button type="primary" onClick={() => handlePublish(inputValue)}>{"Get nodes"}</Button>
                 </div>
-                {[...uniqueNodes].map((node, index) => (
+                <div style={nodesGridStyle}>
+                {[...queryNodes].map((node, index) => (
                   <div key={index} style={nodeStyle}>
                     <div style={nodeTextStyle}>{node}</div>
                   </div>
                 ))}
+                </div>
               </div>
             )
           : (
-              <div>
+              <div style={nodesGridStyle}>
                 {[...uniqueNodes].map((node, index) => (
                   <div key={index + uniqueNodes.size} style={nodeStyle}>
                     <div style={nodeTextStyle}>{node}</div>
@@ -111,6 +118,12 @@ const gridContainerStyle = {
   padding: '20px',
   backgroundColor: 'transparent',
   borderRadius: '8px',
+};
+
+const nodesGridStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)', // Set to 3 columns
+  gap: '20px',
 };
 
 const nodeStyle = {

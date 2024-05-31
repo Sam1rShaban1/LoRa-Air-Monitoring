@@ -26,6 +26,7 @@ class MonitoringMessage: public DataMessageGeneric{
     uint16_t nAddress;
     uint16_t nServices;
     uint16_t nRoutes;
+    String routeTable;
     GPSMessage gps;
     uint32_t helloPacket[5] = {0, 1, 2, 3, 4};
 
@@ -36,6 +37,7 @@ class MonitoringMessage: public DataMessageGeneric{
         doc["monitoringState"] = 1; // FF: for short monitoring message
         doc["nServices"] = nServices;
         doc["nRoutes"] = nRoutes;
+        // doc["routeTable"] = routeTable;
     }
 
     void deserialize(JsonObject& doc) {
