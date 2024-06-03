@@ -14,6 +14,8 @@
 
 #include "config.h"
 
+#include "led/led.h"
+
 #include "wallet/wallet.h"  // FF: needed if signature is made
 
 class Monitoring: public MessageService{
@@ -71,4 +73,10 @@ class Monitoring: public MessageService{
     String getRoutingTable();
 
     int getRoutes();
+
+    int getLEDstatus();
+
+    int getOutMessages();
+
+    int getInMessages();
 };

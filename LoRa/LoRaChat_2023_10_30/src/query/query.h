@@ -18,6 +18,8 @@
 
 #include "LoraMesher.h"
 
+#include "led/led.h"
+
 class Query : public MessageService {
 public:
     /**
@@ -67,7 +69,15 @@ private:
 
     int getRoutingTable();
 
+    String getRoutingTableNodesGW();
+
     String getRoutingTableNodes();
+
+    int getLEDstatus();
+
+    int getOutMessages();
+
+    int getInMessages();
 };
 
     

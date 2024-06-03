@@ -12,8 +12,8 @@ enum QueryCommand: uint32_t {
     services = 0,
     routes = 1,
     status = 2,
-    mMessages = 3,
-    qMessages = 4,
+    outMessages = 3,
+    inMessages = 4,
     rTable = 5,
     rTableGW = 6
 };

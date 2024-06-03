@@ -27,7 +27,11 @@ class MonitoringMessage: public DataMessageGeneric{
     uint16_t nServices;
     uint16_t nRoutes;
     String routeTable;
+    uint16_t ledStatus;
+    uint16_t outMessages;
+    uint16_t inMessages;
     GPSMessage gps;
+    
     uint32_t helloPacket[5] = {0, 1, 2, 3, 4};
 
     void serialize(JsonObject& doc) {
@@ -37,6 +41,9 @@ class MonitoringMessage: public DataMessageGeneric{
         doc["monitoringState"] = 1; // FF: for short monitoring message
         doc["nServices"] = nServices;
         doc["nRoutes"] = nRoutes;
+        doc["ledStatus"] = ledStatus;
+        doc["outMessages"] = outMessages;
+        doc["inMessages"] = inMessages;
         // doc["routeTable"] = routeTable;
     }
 

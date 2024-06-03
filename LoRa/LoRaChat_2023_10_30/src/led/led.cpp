@@ -7,6 +7,10 @@ void Led::init() {
     pinMode(LED, OUTPUT);
 }
 
+int Led::getState(){
+    return state;
+}
+
 String Led::ledOn() {
     digitalWrite(LED, LED_ON);
     ESP_LOGV(LED_TAG, "Led On");

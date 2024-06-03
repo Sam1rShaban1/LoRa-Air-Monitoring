@@ -12,13 +12,15 @@ const Query = ({ publish }) => {
   };
 
   const onFinish = (values) => {
-    const { qos, node, payload } = values;
-    const pubTopic = "from-server/" + node;
+    const { gateway_node, qos, node, payload } = values;
+    const pubTopic = "from-server/" + gateway_node;
+    console.log(pubTopic)
     const pubValues = { node, qos, payload, pubTopic };
     publish(pubValues);
   };
 
   const recordP = {
+    gateway_node: '',
     node: '',
     qos: 0,
     payload: '', // This will be set by button clicks
@@ -36,6 +38,14 @@ const Query = ({ publish }) => {
       onFinish={onFinish}
     >
       <Row gutter={20}>
+        <Col span={24}>
+          <Form.Item
+            label={<span style={labelStyle}>Gateway Node</span>}
+            name="gateway_node"
+          >
+            <Input />
+          </Form.Item>
+        </Col>
         <Col span={12}>
           <Form.Item
             label={<span style={labelStyle}>Node</span>}
@@ -84,14 +94,14 @@ const Query = ({ publish }) => {
         <Col span={8}>
           <Form.Item>
             <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(3)}>
-              Monitoring Messages
+              Outgoing Messages
             </Button>
           </Form.Item>
         </Col>
         <Col span={8}>
           <Form.Item>
             <Button type="primary" style={buttonStyle} onClick={() => handleButtonClick(4)}>
-              Query Messages
+              Incoming Messages
             </Button>
           </Form.Item>
         </Col>

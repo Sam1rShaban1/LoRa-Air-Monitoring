@@ -53,7 +53,7 @@ services:
       - influxdb
         
   query:
-    image: query-app:1.0
+    image: query_app:1.0
     restart: always
     build:
       context: ./query

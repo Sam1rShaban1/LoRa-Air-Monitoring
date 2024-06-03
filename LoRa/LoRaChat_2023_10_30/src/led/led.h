@@ -31,6 +31,8 @@ public:
 
     void init();
 
+    int getState();
+
     String ledOn();
 
     String ledOn(uint16_t dst);

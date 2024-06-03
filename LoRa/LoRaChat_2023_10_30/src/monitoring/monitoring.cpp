@@ -196,6 +196,9 @@ void Monitoring::createAndSendMonitoring(){
         message->nServices = getServices();
         message->nRoutes = getRoutes();
         message->routeTable = getRoutingTable();
+        message->ledStatus = getLEDstatus();
+        message->outMessages = getOutMessages();
+        message->inMessages = getInMessages();
         MessageManager::getInstance().sendMessage(messagePort::MqttPort, (DataMessage*) message);
 
         free(message);
@@ -257,4 +260,18 @@ String Monitoring::getRoutingTable(){
 int Monitoring::getRoutes(){
     LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
     return routingTableList->getLength();
+}
+
+int Monitoring::getLEDstatus(){
+    Led& led = Led::getInstance();
+    return led.getState();
+}
+
+int Monitoring::getOutMessages(){
+    return 0;
+}
+
+int Monitoring::getInMessages(){
+    Led& led = Led::getInstance();
+    return 0;
 }

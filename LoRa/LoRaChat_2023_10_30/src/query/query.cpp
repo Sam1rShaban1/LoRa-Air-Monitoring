@@ -119,15 +119,15 @@ void Query::processReceivedMessage(messagePort port, DataMessage* message) {
             break;
         case QueryCommand::status:
             queryPetitionS = "Status";
-            queryAnswerS = getRoutingTable();
+            queryAnswerS = getLEDstatus();
             break;
-        case QueryCommand::mMessages:
-            queryPetitionS = "mMessages";
-            queryAnswerS = getRoutingTable();
+        case QueryCommand::outMessages:
+            queryPetitionS = "Outgoing messages";
+            queryAnswerS = getOutMessages();
             break;
-        case QueryCommand::qMessages:
-            queryPetitionS = "qMessages";
-            queryAnswerS = getRoutingTable();
+        case QueryCommand::inMessages:
+            queryPetitionS = "Incoming messages";
+            queryAnswerS = getInMessages();
             break;
         case QueryCommand::rTable:
             queryPetitionS = "Routing Table";
@@ -135,7 +135,7 @@ void Query::processReceivedMessage(messagePort port, DataMessage* message) {
             break;
         case QueryCommand::rTableGW:
             queryPetitionS = "Routing Table GW";
-            queryAnswerS = getRoutingTableNodes();
+            queryAnswerS = getRoutingTableNodesGW();
             break;
         default:
             break;
@@ -203,7 +203,7 @@ int Query::getServices(){
 }
 
 
-String Query::getRoutingTableNodes(){
+String Query::getRoutingTableNodesGW(){
     LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
     int thisNodeAdr = LoraMesher::getInstance().getLocalAddress();
     String nodes = nodes+thisNodeAdr;
@@ -222,4 +222,33 @@ String Query::getRoutingTableNodes(){
 int Query::getRoutingTable(){
     LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
     return routingTableList->getLength();
+}
+
+String Query::getRoutingTableNodes(){
+    LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
+    int thisNodeAdr = LoraMesher::getInstance().getLocalAddress();
+    String nodes = "";
+    routingTableList->setInUse();
+    if(routingTableList->getLength() == 1){
+        RouteNode *rtn = routingTableList->getCurrent();
+        nodes = nodes+rtn->networkNode.address;
+    }
+    while (routingTableList->next()){
+        RouteNode *rtn = routingTableList->getCurrent();
+        nodes = nodes + "," + rtn->networkNode.address;
+    }
+    return nodes;
+}
+
+int Query::getLEDstatus(){
+    Led& led = Led::getInstance();
+    return led.getState();
+}
+
+int Query::getOutMessages(){
+    return 0;
+}
+
+int Query::getInMessages(){
+    return 0;
 }
