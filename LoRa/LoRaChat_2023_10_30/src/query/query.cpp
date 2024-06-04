@@ -6,6 +6,14 @@ void Query::init() {
     pinMode(LED, OUTPUT);
 }
 
+int Query::getQueryID(){
+    return queryId;
+}
+
+int Query::getInQuery(){
+    return inQuery;
+}
+
 String Query::queryOn() {
     digitalWrite(LED, LED_ON);
     ESP_LOGV(QUERY_TAG, "Led On");
@@ -96,6 +104,7 @@ DataMessage* Query::getQueryMessage(QueryCommand command, uint16_t dst) {
 }
 
 void Query::processReceivedMessage(messagePort port, DataMessage* message) {
+    inQuery++;
     QueryMessage* queryMessage = (QueryMessage*) message;
     
     Log.infoln(F("FF: Query::processReceivedMessage  perform local actions") );
@@ -246,9 +255,11 @@ int Query::getLEDstatus(){
 }
 
 int Query::getOutMessages(){
-    return 0;
+    Monitoring& monitoring = Monitoring::getInstance();
+    return monitoring.getOutMessages();
 }
 
 int Query::getInMessages(){
-    return 0;
+    return inQuery;
 }
+

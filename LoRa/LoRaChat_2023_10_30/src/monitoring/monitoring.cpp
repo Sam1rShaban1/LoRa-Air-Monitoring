@@ -263,15 +263,15 @@ int Monitoring::getRoutes(){
 }
 
 int Monitoring::getLEDstatus(){
-    Led& led = Led::getInstance();
     return led.getState();
 }
 
 int Monitoring::getOutMessages(){
-    return 0;
+    Query& query = Query::getInstance();
+    return query.getQueryID()+monitoringId;
 }
 
 int Monitoring::getInMessages(){
-    Led& led = Led::getInstance();
-    return 0;
+    Query& query = Query::getInstance();
+    return query.getInQuery();
 }

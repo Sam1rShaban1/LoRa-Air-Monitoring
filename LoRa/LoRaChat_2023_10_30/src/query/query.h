@@ -20,6 +20,8 @@
 
 #include "led/led.h"
 
+#include "monitoring/monitoring.h"
+
 class Query : public MessageService {
 public:
     /**
@@ -30,6 +32,10 @@ public:
         static Query instance;
         return instance;
     }
+
+    int getQueryID();
+
+    int getInQuery();
 
     QueryCommandService* queryCommandService = new QueryCommandService();
 
@@ -59,11 +65,14 @@ private:
     };
 
     uint8_t queryId = 0;
+    uint8_t inQuery = 0;
 
     QueryCommand queryCommandS;
     String queryAnswerS;
     u_int32_t queryvalueS;
     String queryPetitionS;
+
+    
 
     int getServices();
 

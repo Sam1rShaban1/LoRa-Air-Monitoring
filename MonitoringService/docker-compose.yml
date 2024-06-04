@@ -51,6 +51,9 @@ services:
       - iot
     depends_on:
       - influxdb
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/
+
         
   query:
     image: query_app:1.0

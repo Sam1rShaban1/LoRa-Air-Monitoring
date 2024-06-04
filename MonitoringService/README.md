@@ -21,31 +21,11 @@ Credentials for your local grafana server are user: "admin" password: "admin"
 
 Query web app: [http://localhost:3006](http://localhost:3006)
 
-To configure grafana go to: 
 
-Option Menu -> Data sources and add the "influxdb" data source.
-
-Change the query language to "Flux" (default is InfluxQL).
-
-In the HTTP section enter the following URL: http://influxdb:8086.
-
-Go down to "InfluxDB Details" and enter the following:
-
-"Organization" = TFG
-"Token" = tfg-iotdata-auth-token
-"Default Bucket" = loramesher
-
-Click "Save & test" and the datasource should be successfully added.
-
-Then create a new dashboard, add a visualization and select the InfluxDB data source.
-After that add the following example query:
+You can also start the monitoring services by running the .sh file:
 
 ```bash
-from(bucket: "loramesher")
-  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)
-  |> aggregateWindow(every: 1m,fn: mean)
-  |> filter(fn: (r) =>
-    r._measurement == "mqtt_consumer" and 
-    r._field == "data_nServices"
-  )
+./startMonitoring.sh
 ```
+
+The services will open in your default browser as they start.

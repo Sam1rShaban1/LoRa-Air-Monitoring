@@ -16,6 +16,8 @@
 
 #include "led/led.h"
 
+#include "query/query.h"
+
 #include "wallet/wallet.h"  // FF: needed if signature is made
 
 class Monitoring: public MessageService{
@@ -34,6 +36,8 @@ class Monitoring: public MessageService{
     String monitoringIdle(uint16_t dst);
     String monitoringActive();
     String monitoringActive(uint16_t dst);
+
+    int getOutMessages();
 
     // sending
     void createAndSendMonitoring();
@@ -57,7 +61,8 @@ class Monitoring: public MessageService{
     TaskHandle_t monitoring_TaskHandle = NULL;
     bool running = false;
     uint8_t monitoringId = 0;
-
+    Led& led = Led::getInstance();
+    
     void createMonitoringTask();
 
     static void monitoringLoop(void*);
@@ -75,8 +80,6 @@ class Monitoring: public MessageService{
     int getRoutes();
 
     int getLEDstatus();
-
-    int getOutMessages();
 
     int getInMessages();
 };
