@@ -86,7 +86,7 @@
 #define MAX_CONNECTION_TRY 10
 
 // WiFi credentials
-#define WIFI_SSID "MIWIFI_5G_FP7v-2G"
+#define WIFI_SSID "MIWIFI_5G_FP7v-2Gtest"
 #define WIFI_PASSWORD "AuJXRukf"
 // #define WIFI_SSID "JackHotspot"
 // #define WIFI_PASSWORD "12345678"

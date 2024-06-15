@@ -238,7 +238,7 @@ String Query::getRoutingTableNodes(){
     int thisNodeAdr = LoraMesher::getInstance().getLocalAddress();
     String nodes = "";
     routingTableList->setInUse();
-    if(routingTableList->getLength() == 1){
+    if(routingTableList->getLength() > 0){
         RouteNode *rtn = routingTableList->getCurrent();
         nodes = nodes+rtn->networkNode.address;
     }
