@@ -1,13 +1,11 @@
 #pragma once
 
 #include <Arduino.h>
-
 #include <ArduinoJson.h>
-
 
 #pragma pack(1)
 
-//Message Ports
+// Message Ports
 enum messagePort: uint8_t {
     LoRaMeshPort = 1,
     BluetoothPort = 2,
@@ -15,8 +13,7 @@ enum messagePort: uint8_t {
     MqttPort = 4
 };
 
-//TODO: This should be defined by the user, all the apps that are available and their numbers should be the same
-//TODO: in all the nodes of the network.
+// App Ports
 enum appPort: uint8_t {
     LoRaChat = 1,
     BluetoothApp = 2,
@@ -42,23 +39,21 @@ public:
     appPort appPortDst;
     appPort appPortSrc;
     uint8_t messageId;
-
     uint16_t addrSrc;
     uint16_t addrDst;
-
-    uint32_t messageSize; //Message Size of the payload no include header
+    String incomingData = "";
+    uint32_t messageSize; // Message Size of the payload, not including header
 
     uint32_t getDataMessageSize() {
         return sizeof(DataMessageGeneric) + messageSize;
     }
 
     void serialize(JsonObject& doc) {
-        // doc["appPortDst"] = appPortDst;
-        // doc["appPortSrc"] = appPortSrc;
         doc["messageId"] = messageId;
         doc["addrSrc"] = addrSrc;
         doc["addrDst"] = addrDst;
         doc["messageSize"] = messageSize;
+        doc["incomingData"] = incomingData;  // Serialize incomingData to "incomingData" key
     }
 
     void deserialize(JsonObject& doc) {
@@ -68,12 +63,15 @@ public:
         addrSrc = doc["addrSrc"];
         addrDst = doc["addrDst"];
         messageSize = doc["messageSize"];
+        if (doc.containsKey("incomingData")) {  // Use "incomingData" as key for deserialization
+            incomingData = doc["incomingData"].as<String>();  
+        }
     }
 };
 
 class DataMessage: public DataMessageGeneric {
 public:
-    uint8_t message[];
+    uint8_t message[]; // Dynamic payload for message data
 };
 
 #pragma pack()

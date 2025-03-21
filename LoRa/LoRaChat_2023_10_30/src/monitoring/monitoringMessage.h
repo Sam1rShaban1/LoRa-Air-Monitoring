@@ -1,13 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
-
 #include <ArduinoLog.h>
-
 #include "message/dataMessage.h"
-
 #include "gps/gpsMessage.h"
-#include "message/dataMessage.h"
 #include "sensorlto/signatureMessage.h"
 
 #pragma pack(1)
@@ -19,8 +15,8 @@ enum MonitoringState: uint8_t {
     mActive = 1
 };
 
-class MonitoringMessage: public DataMessageGeneric{
-    public:
+class MonitoringMessage: public DataMessageGeneric {
+public:
     MonitoringState monitoringState;
     int monitoringSendTimeInterval;
     uint16_t nAddress;
@@ -31,7 +27,7 @@ class MonitoringMessage: public DataMessageGeneric{
     uint16_t outMessages;
     uint16_t inMessages;
     GPSMessage gps;
-    
+        
     uint32_t helloPacket[5] = {0, 1, 2, 3, 4};
 
     void serialize(JsonObject& doc) {
@@ -45,13 +41,31 @@ class MonitoringMessage: public DataMessageGeneric{
         doc["outMessages"] = outMessages;
         doc["inMessages"] = inMessages;
         // doc["routeTable"] = routeTable;
+        // doc["latitude"] = gps.latitude;
+        // doc["longitude"] = gps.longitude;
+        // doc["hour"] = gps.hour;
+        // doc["minute"] = gps.minute;
+        // doc["second"] = gps.second;
+        doc["incomingData"] = DataMessageGeneric::incomingData;
     }
 
     void deserialize(JsonObject& doc) {
         ((DataMessageGeneric*)(this))->deserialize(doc);
         monitoringState = doc["monitoringState"];
         Log.verbose(F("Monitoring in monitoringMessage.h deserialized %d"), monitoringState);
+
+        if (doc.containsKey("incomingData")) {  // Corrected to match "incomingData"
+            DataMessageGeneric::incomingData = doc["incomingData"].as<String>();  // Deserializing incomingData properly
+        }
+    }
+
+    void update() {
+        // Read from Serial1 in the update method
+        if (Serial1.available()) {
+            char incomingByte = Serial1.read();
+            DataMessageGeneric::incomingData += incomingByte; // Concatenate incomingByte to incomingData (using inherited incomingData)
+        }
     }
 };
-#pragma pack()
 
+#pragma pack()

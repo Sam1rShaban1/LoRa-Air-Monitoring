@@ -9,6 +9,7 @@ HardwareSerial GPS(1);
 SoftwareSerial GPS(GPS_RX, GPS_TX);
 #endif
 
+
 void GPSService::initGPS() {
 #if defined(T_BEAM_V10)
     if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {

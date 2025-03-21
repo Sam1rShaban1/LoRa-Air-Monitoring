@@ -1,7 +1,7 @@
 #pragma once
 
 // Choose the device, choose it directly in the platformio.ini file
-// #define T_BEAM_V10 // ttgo-t-beam
+#define T_BEAM_V10 // ttgo-t-beam
 // #define T_BEAM_LORA_32 // ttgo-lora32-v1
 // #define NAYAD_V1
 // #define NAYAD_V1R2
@@ -86,14 +86,14 @@
 #define MAX_CONNECTION_TRY 10
 
 // WiFi credentials
-#define WIFI_SSID "MIWIFI_5G_FP7v-2Gtest"
-#define WIFI_PASSWORD "AuJXRukf"
+#define WIFI_SSID "DSG_Lab"
+#define WIFI_PASSWORD "mvdsi304"
 // #define WIFI_SSID "JackHotspot"
 // #define WIFI_PASSWORD "12345678"
 
 // MQTT configurationsuod
 #define MQTT_ENABLED
-#define MQTT_SERVER "192.168.1.140" 
+#define MQTT_SERVER "192.168.1.109" 
 #define MQTT_PORT 1883
 #define MQTT_USERNAME "admin"
 #define MQTT_PASSWORD "public"
