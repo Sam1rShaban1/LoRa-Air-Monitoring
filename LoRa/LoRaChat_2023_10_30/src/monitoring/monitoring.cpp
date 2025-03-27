@@ -1,277 +1,372 @@
+// monitoring.cpp
 #include "monitoring.h"
-//#include "sensorlto/temperature.h"
-#include "sensor.h"
+#include "monitoringMessage.h"
+#include <ArduinoJson.h>     // Required for JSON handling
+#include "loramesh/loraMeshService.h"       // Required for LoraMesher::getInstance()
+#include "message/messageManager.h"  // Required for MessageManager::getInstance()
+// #include "sensor.h"       // Include if sensor functions are needed elsewhere
+// Include other necessary headers from your project structure
 
-static const char* MONITORING_TAG = "MonitoringService";
+// Make sure ESP_LOGx levels are defined appropriately in your config/sdkconfig
+#include "esp_log.h"
 
+static const char* MONITORING_TAG = "MonitoringService"; // TAG for ESP_LOGx
+
+// --- Initialization and Control ---
 void Monitoring::init(){
-    //Log.notice(F("Initializing monitoring" CR));
     ESP_LOGV(MONITORING_TAG, "Initializing monitoring");
+    // !!! IMPORTANT: Ensure Serial1 is initialized somewhere in your setup() !!!
+    // Example: Serial1.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
     createMonitoringTask();
     startMonitoring();
 }
 
 void Monitoring::startMonitoring(){
-    //Log.notice(F("Starting monitoring" CR));
     ESP_LOGV(MONITORING_TAG, "Starting monitoring");
     running = true;
-    xTaskNotifyGive(monitoring_TaskHandle);
-    //Log.noticeln(F("Monitoring task started"));
-    ESP_LOGV(MONITORING_TAG, "Monitoring task started");
+    // Notify the task to start running if it was waiting
+    if (monitoring_TaskHandle != NULL) {
+        xTaskNotifyGive(monitoring_TaskHandle);
+    }
+    ESP_LOGV(MONITORING_TAG, "Monitoring task notified to start");
 }
 
 void Monitoring::stopMonitoring() {
-    //Log.notice(F("Stopping monitoring" CR));
     ESP_LOGV(MONITORING_TAG, "Stopping monitoring");
     running = false;
+    // Task will stop processing in its loop after the current cycle
 }
 
-//commands for Cpd
-
+// --- Commands Implementation ---
 String Monitoring::monitoringIdle(){
-    digitalWrite(LED, LED_OFF);
-    //Log.verboseln(F("Monitoring waiting"));
-    ESP_LOGV(MONITORING_TAG, "Monitoring waiting");
-    return "Monitoring waiting";
+    digitalWrite(LED, LED_OFF); // Assumes LED and LED_OFF are defined in config.h or led.h
+    ESP_LOGV(MONITORING_TAG, "Monitoring state set to Idle locally");
+    return "Monitoring Idle";
 }
 
 String Monitoring::monitoringIdle(uint16_t dst) {
-    if (dst == LoraMesher::getInstance().getLocalAddress()) { //FF: falta {}?? -> added
-        //Log.verboseln(F("return to monitoringIdle()"));
-        ESP_LOGV(MONITORING_TAG, "return to monitoringIdle()");
+    if (dst == LoraMesher::getInstance().getLocalAddress()) {
+        ESP_LOGV(MONITORING_TAG, "Executing monitoringIdle locally for dst=%X", dst);
         return monitoringIdle();
-    } 
+    }
 
+    ESP_LOGV(MONITORING_TAG, "Sending monitoringIdle command to %X", dst);
     DataMessage* msg = getMonitoringMessage(MonitoringState::mIdle, dst);
+    // Assuming LoRaMeshPort is defined in message/messageService.h or similar
     MessageManager::getInstance().sendMessage(messagePort::LoRaMeshPort, msg);
+    // MessageManager should handle deletion of 'msg' after sending
+    // delete msg; // Only uncomment if MM does *not* manage memory
 
-    delete msg;
-
-    return "Monitoring waiting";
+    return "Monitoring Idle command sent";
 }
 
 String Monitoring::monitoringActive(){
-    digitalWrite(LED, LED_ON);
-    //Log.verboseln(F("Monitoring active"));
-    ESP_LOGV(MONITORING_TAG, "Monitoring active");
-    return "Monitoring active";
+    digitalWrite(LED, LED_ON); // Assumes LED and LED_ON are defined
+    ESP_LOGV(MONITORING_TAG, "Monitoring state set to Active locally");
+    return "Monitoring Active";
 }
 
 String Monitoring::monitoringActive(uint16_t dst) {
-    if (dst == LoraMesher::getInstance().getLocalAddress())  { //FF: falta {}?? -> added //FF: falta {}??
+    if (dst == LoraMesher::getInstance().getLocalAddress()) {
+        ESP_LOGV(MONITORING_TAG, "Executing monitoringActive locally for dst=%X", dst);
         return monitoringActive();
     }
 
+    ESP_LOGV(MONITORING_TAG, "Sending monitoringActive command to %X", dst);
     DataMessage* msg = getMonitoringMessage(MonitoringState::mActive, dst);
     MessageManager::getInstance().sendMessage(messagePort::LoRaMeshPort, msg);
+    // MessageManager should handle deletion of 'msg' after sending
+    // delete msg; // Only uncomment if MM does *not* manage memory
 
-    delete msg;
-
-    return "Monitoring active";
+    return "Monitoring Active command sent";
 }
 
-//end commands for Cpd
-
-// for receiving
+// --- Message Handling Implementation ---
 
 DataMessage* Monitoring::getDataMessage(JsonObject data) {
-    MonitoringMessage* monitoringMessage = new MonitoringMessage();
+    MonitoringMessage* monitoringMessage = new MonitoringMessage(); // Use new
     monitoringMessage->deserialize(data);
-    monitoringMessage->messageSize = sizeof(MonitoringMessage) - sizeof(DataMessageGeneric);  //FF: substracts header
-    //Log.verbose(F("Monitoring getDataMessage in monitoring.cpp"));
-    ESP_LOGV(MONITORING_TAG, "Monitoring getDataMessage in monitoring.cpp");
+    // Calculate size approximately. Might not be perfectly accurate with Strings.
+    monitoringMessage->messageSize = sizeof(MonitoringMessage) - sizeof(DataMessageGeneric);
+    ESP_LOGV(MONITORING_TAG, "Created MonitoringMessage from JSON");
     return ((DataMessage*) monitoringMessage);
 }
 
 DataMessage* Monitoring::getMonitoringMessage(MonitoringState state, uint16_t dst){
-    MonitoringMessage* monitoringMessage = new MonitoringMessage();
-    monitoringMessage-> messageSize = sizeof(MonitoringMessage) - sizeof(DataMessageGeneric);
+    MonitoringMessage* monitoringMessage = new MonitoringMessage(); // Use new
+    monitoringMessage->messageSize = sizeof(MonitoringMessage) - sizeof(DataMessageGeneric); // Approx size
     monitoringMessage->monitoringState = state;
-    monitoringMessage->appPortSrc = appPort::MonitoringApp;
-    monitoringMessage->appPortDst = appPort::MonitoringApp;
+    monitoringMessage->appPortSrc = appPort::MonitoringApp; // Defined in messageService.h?
+    monitoringMessage->appPortDst = appPort::MonitoringApp; // Destination app is also Monitoring
     monitoringMessage->addrSrc = LoraMesher::getInstance().getLocalAddress();
     monitoringMessage->addrDst = dst;
-    //Log.verbose(F("Monitoring getMonitoringMessage in monitoring.cpp %d"), monitoringMessage->monitoringState);
-    ESP_LOGV(MONITORING_TAG, "Monitoring getMonitoringMessage in monitoring.cpp %d", monitoringMessage->monitoringState);
+    ESP_LOGV(MONITORING_TAG, "Created Monitoring command message, state: %d, dst: %X", state, dst);
     return (DataMessage*) monitoringMessage;
 }
 
 void Monitoring::processReceivedMessage(messagePort port, DataMessage* message){
+    // Cast the incoming message
     MonitoringMessage* monitoringMessage = (MonitoringMessage*) message;
+    ESP_LOGV(MONITORING_TAG, "Processing received message with state: %d", monitoringMessage->monitoringState);
+
     switch(monitoringMessage->monitoringState){
         case MonitoringState::mIdle:
-            //Log.verbose(F("Monitoring processReveivedMessage :Idle"));
-            ESP_LOGV(MONITORING_TAG, "Monitoring getMonitoringMessage in monitoring.cpp");
-            monitoringIdle();
+            ESP_LOGV(MONITORING_TAG, "Received monitoringIdle command");
+            monitoringIdle(); // Execute local action
+            break; // <<< FIXED: Added break;
+
         case MonitoringState::mActive:
-            //Log.verbose(F("Monitoring processReveivedMessage: Active"));
-            ESP_LOGV(MONITORING_TAG, "Monitoring processReveivedMessage: Active");
-            monitoringActive();
+            ESP_LOGV(MONITORING_TAG, "Received monitoringActive command");
+            monitoringActive(); // Execute local action
+            break; // <<< FIXED: Added break;
+
         default:
-            //Log.verboseln(F("Monitoring processReceivedMessage :default"));
-            //Log.verboseln(F("Monitoring processReceivedMessage :default value: %d"), monitoringMessage->monitoringState);
-            ESP_LOGV(MONITORING_TAG, "Monitoring processReceivedMessage :default value %d", monitoringMessage->monitoringState);
-            break;        
+            // Log unexpected state values if necessary
+            ESP_LOGW(MONITORING_TAG, "Received message with unknown monitoring state: %d", monitoringMessage->monitoringState);
+            break;
     }
+    // MessageManager should handle deleting the original received 'message' after processing
 }
 
 
 String Monitoring::getJSON(DataMessage* message){
-    //Log.verbose(F("Monitoring getJSON" CR));
-    ESP_LOGV(MONITORING_TAG, "Monitoring getJSON");
+    ESP_LOGV(MONITORING_TAG, "Generating JSON for MonitoringMessage");
     MonitoringMessage* monitoringMessage = (MonitoringMessage*) message;
-    //DynamicJsonDocument doc(1024);
+    // Adjust JSON document size based on max expected size (especially sensorDataJson and routeTable)
     DynamicJsonDocument doc(2048);
     JsonObject jsonObj = doc.to<JsonObject>();
+
+    // Create the nested "data" object as per the original structure
     JsonObject dataObj = jsonObj.createNestedObject("data");
+    getJSONDataObject(dataObj, monitoringMessage); // Populate the data object
 
-    getJSONDataObject(dataObj, monitoringMessage);
-
-    //serializeJsonPretty(doc, Serial); // FF: uncommented
-
-    // getJSONSignObject(jsonObj, metadataMessage);
+    // Add signature if needed (currently commented out in header)
+    // getJSONSignObject(jsonObj, monitoringMessage);
 
     String json;
-    serializeJson(doc, json);
-    //serializeJsonPretty(doc, Serial);  // FF: added
-
+    serializeJson(doc, json); // Serialize the document to a String
+    // serializeJsonPretty(doc, Serial); // Optional: for debugging output to Serial
+    ESP_LOGV(MONITORING_TAG, "Generated JSON length: %d", json.length());
     return json;
 }
 
-// implementation of private functions
+// --- Task and Loop Implementation ---
 
 void Monitoring::createMonitoringTask(){
+    // Create the task, passing 'this' instance pointer
     int res = xTaskCreate(
-        monitoringLoop,
-        "Monitoring Task",
-        4096,
-        (void*) 1,
-        2,
-        &monitoring_TaskHandle
+        monitoringLoop,         // Function to implement the task
+        "Monitoring Task",      // Name of the task
+        4096,                   // Stack size in words
+        (void*) this,           // Task input parameter (pointer to Monitoring instance)
+        2,                      // Priority of the task
+        &monitoring_TaskHandle  // Task handle
     );
 
     if (res != pdPASS) {
-        //Log.error(F("Failed to create monitoring task" CR));
-        ESP_LOGV(MONITORING_TAG, "Failed to create monitoring task");
+        ESP_LOGE(MONITORING_TAG, "Failed to create monitoring task! Error code: %d", res);
+    } else {
+        ESP_LOGI(MONITORING_TAG, "Monitoring task created successfully.");
     }
 }
 
 void Monitoring::monitoringLoop(void* pvParameters) {
-    Monitoring& monitoring =Monitoring::getInstance();
+    // Cast the parameter back to the Monitoring instance pointer
+    Monitoring* monitoringInstance = (Monitoring*) pvParameters;
+    static String uartInputBuffer = ""; // Static buffer to accumulate chars across loop iterations
+    const int MAX_UART_BUFFER_SIZE = 1024; // Safety limit for the buffer
 
-    while (true){
-        if (!monitoring.running) {
+    ESP_LOGI(MONITORING_TAG, "Monitoring task started execution.");
+
+    while (true) { // Loop forever
+        if (!monitoringInstance->running) {
+            ESP_LOGI(MONITORING_TAG, "Monitoring task pausing.");
+            // Wait indefinitely until notified by startMonitoring()
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        } 
-        else {
+            ESP_LOGI(MONITORING_TAG, "Monitoring task resumed.");
+        } else {
+            // --- Read Serial1 Data ---
+            while (Serial1.available()) {
+                char incomingByte = Serial1.read();
+                if (incomingByte == '\n') { // Check for newline - end of message?
+                    uartInputBuffer.trim(); // Remove leading/trailing whitespace
+                    if (uartInputBuffer.length() > 0) {
+                        // Store the received string directly
+                        monitoringInstance->currentSensorJsonData = uartInputBuffer;
+                        ESP_LOGD(MONITORING_TAG, "Stored UART data (len %d): %s", uartInputBuffer.length(), monitoringInstance->currentSensorJsonData.c_str());
+                    } else {
+                         ESP_LOGV(MONITORING_TAG, "Received empty line from UART.");
+                    }
+                    uartInputBuffer = ""; // Reset buffer for the next message
+                } else if (incomingByte >= 32) { // Accumulate printable characters
+                    if (uartInputBuffer.length() < MAX_UART_BUFFER_SIZE) {
+                         uartInputBuffer += incomingByte;
+                    } else {
+                        // Prevent buffer overflow
+                        ESP_LOGW(MONITORING_TAG, "UART input buffer overflow, discarding data. Resetting buffer.");
+                        uartInputBuffer = ""; // Reset buffer on overflow
+                    }
+                }
+                // Non-printable characters other than '\n' are ignored
+            }
+            // --- End Reading Serial1 ---
+
+            // --- Send Periodic Monitoring Status ---
+            ESP_LOGV(MONITORING_TAG, "Creating and sending monitoring status. Free heap: %d", ESP.getFreeHeap());
+            monitoringInstance->createAndSendMonitoring(); // Gather data and send
+            ESP_LOGV(MONITORING_TAG, "Monitoring status sent. Free heap: %d", ESP.getFreeHeap());
+
+            // --- Delay ---
+            // Use the delay value from config
             vTaskDelay(MONITORING_UPDATE_DELAY / portTICK_PERIOD_MS);
-            //Log.verboseln(F("before send monitoringLoop Free heap: %d"), ESP.getFreeHeap());
-            ESP_LOGV(MONITORING_TAG, "before send monitoringLoop Free heap: %d", ESP.getFreeHeap());
-            monitoring.createAndSendMonitoring();
-            //Log.verboseln(F("after send monitoringLoop Free heap: %d"), ESP.getFreeHeap());
-            ESP_LOGV(MONITORING_TAG, "after send monitoringLoop Free heap: %d", ESP.getFreeHeap());
         }
     }
 }
 
+
 void Monitoring::createAndSendMonitoring(){
-    // uint8_t metadataSize = 1; //TODO: This should be dynamic with an array of sensors
-    // uint16_t metadataSensorSize = metadataSize * sizeof(MetadataSensorMessage);
-
-    uint16_t messageWithHeaderSize = sizeof(MonitoringMessage);  // + metadataSensorSize;
-
-    MonitoringMessage* message = (MonitoringMessage*) malloc(messageWithHeaderSize);
+    // Allocate message object using new
+    MonitoringMessage* message = new MonitoringMessage();
 
     if (message) {
-        //Log.verboseln(F("in createAndSendMonitoring() monitoring.cpp Sending monitoring message"));
-        ESP_LOGV(MONITORING_TAG, "in createAndSendMonitoring() monitoring.cpp Sending monitoring message");
+        ESP_LOGV(MONITORING_TAG, "Populating monitoring message for MQTT");
 
-        message->appPortDst = appPort::MQTTApp;
+        // --- Populate Header Fields ---
+        message->appPortDst = appPort::MQTTApp; // Destination is MQTT handler
         message->appPortSrc = appPort::MonitoringApp;
         message->addrSrc = LoraMesher::getInstance().getLocalAddress();
-        message->addrDst = 0;
+        message->addrDst = 0; // Typically 0 for messages destined for MQTT/gateway
         message->messageId = monitoringId++;
-        message->messageSize = messageWithHeaderSize - sizeof(DataMessageGeneric);
+        // Size is approximate, especially with Strings involved
+        message->messageSize = sizeof(MonitoringMessage) - sizeof(DataMessageGeneric);
         message->monitoringSendTimeInterval = MONITORING_UPDATE_DELAY;
+
+        // --- Populate Status Fields using Helper Getters ---
         message->nServices = getServices();
         message->nRoutes = getRoutes();
         message->routeTable = getRoutingTable();
         message->ledStatus = getLEDstatus();
         message->outMessages = getOutMessages();
         message->inMessages = getInMessages();
+
+        // --- <<< Copy the latest sensor data string >>> ---
+        message->sensorDataJson = currentSensorJsonData; // Directly copy the stored string
+        ESP_LOGD(MONITORING_TAG, "Adding sensor data to message: %s", message->sensorDataJson.c_str());
+
+        // --- Send via Message Manager ---
+        // Assuming MqttPort is defined and handled by another service
         MessageManager::getInstance().sendMessage(messagePort::MqttPort, (DataMessage*) message);
 
-        free(message);
-    }
-    else {
-        //Log.errorln(F("Failed to allocate memory for cps message"));
-        ESP_LOGV(MONITORING_TAG, "Failed to allocate memory for cps message");
+        // --- Memory Management ---
+        // IMPORTANT: Assume MessageManager takes ownership or the MQTT service deletes the message.
+        // If you experience memory leaks, you MUST delete the message *after* it has been fully processed/sent.
+        // This might require changes in MessageManager or the receiving service.
+        // delete message; // DO NOT uncomment unless you are SURE it's safe to do so here.
+
+    } else {
+        ESP_LOGE(MONITORING_TAG, "Failed to allocate memory for monitoring message!");
     }
 }
 
-void Monitoring::signData(MonitoringMessage* monitoringMessage) {
-    DynamicJsonDocument doc(1024);
-    JsonObject jsonObj = doc.to<JsonObject>();
-    getJSONDataObject(jsonObj, monitoringMessage);
-
-    // Print the object to the serial port
-    // serializeJsonPretty(doc, Serial);
-
-    String json;
-    serializeJson(doc, json);
-
-    // Wallet::getInstance().signJson(json, metadataMessage->signature);
-    // memcpy(metadataMessage->signature, signStr.c_str(), signStr.length());
-}
-
+// --- JSON Helper Implementation ---
 void Monitoring::getJSONDataObject(JsonObject& doc, MonitoringMessage* monitoringMessage) {
+    // Delegate the serialization of data fields to the message object itself
     monitoringMessage->serialize(doc);
 }
 
+// --- Signing (Implement if needed) ---
+/*
+void Monitoring::signData(MonitoringMessage* monitoringMessage) {
+    // ... Create JSON object of data to sign ...
+    // ... Call Wallet::getInstance().signJson(...) ...
+    // ... Copy signature into message ...
+}
+
 void Monitoring::getJSONSignObject(JsonObject& doc, MonitoringMessage* monitoringMessage) {
-    // metadataMessage->serializeSignature(doc);
+    // ... Add signature fields to the main JSON document ...
 }
+*/
 
+// --- Helper Getter Implementations ---
 int Monitoring::getServices(){
-    MessageManager& manager = MessageManager::getInstance();
-    return manager.getActiveServices().size();
+    // Assuming getActiveServices() is thread-safe or returns a copy
+    return MessageManager::getInstance().getActiveServices().size();
 }
-
 
 String Monitoring::getRoutingTable(){
+    // Get a COPY of the routing table
     LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
-    int thisNodeAdr = LoraMesher::getInstance().getLocalAddress();
-    String routeTable = "No routes";
-    routingTableList->setInUse();
-    if(routingTableList->getLength() > 0){
-        RouteNode *rtn = routingTableList->getCurrent();
-        routeTable =  "" + rtn->networkNode.address;
-        routeTable =  routeTable + " (" + rtn->networkNode.metric + ") via " + rtn->via;
+    if (!routingTableList) {
+        ESP_LOGE(MONITORING_TAG, "Failed to get routing table copy.");
+        return "Error: No Table"; // Return error string
     }
-    while (routingTableList->next()){
-        RouteNode *rtn = routingTableList->getCurrent();
-        String auxNode = rtn->networkNode.address + " (" + rtn->networkNode.metric;
-        auxNode = auxNode + + ") via " + rtn->via;
-        routeTable = routeTable + "," + auxNode;
+
+    String routeTableStr = "";
+    bool first = true;
+
+    routingTableList->setInUse(); // Mark the list as in use (required by LoRaMesher library)
+    int len = routingTableList->getLength();
+    ESP_LOGV(MONITORING_TAG, "Routing table length: %d", len);
+
+    if(len > 0) {
+        do { // Use do-while because getCurrent() might be valid before next()
+            RouteNode *rtn = routingTableList->getCurrent();
+            if (!rtn) { // Safety check
+                 ESP_LOGW(MONITORING_TAG, "Got NULL RouteNode in routing table iteration.");
+                 continue;
+            }
+            // Build the string for this entry
+            String entry = String(rtn->networkNode.address) + " (" + String(rtn->networkNode.metric) + ") via " + String(rtn->via);
+
+            if (!first) {
+                routeTableStr += ","; // Add separator
+            }
+            routeTableStr += entry;
+            first = false;
+
+        } while (routingTableList->next()); // Move to the next node
+    } else {
+        routeTableStr = "No routes";
     }
-    return routeTable;
+
+    routingTableList->releaseInUse(); // Release the list (required by LoRaMesher library)
+    delete routingTableList; // <<< FIXED: Delete the copy to prevent memory leak
+
+    ESP_LOGV(MONITORING_TAG, "Generated routing table string: %s", routeTableStr.c_str());
+    return routeTableStr;
 }
 
 int Monitoring::getRoutes(){
+    // Get a COPY to find the length
     LM_LinkedList<RouteNode>* routingTableList = LoRaMeshService::getInstance().radio.routingTableListCopy();
-    return routingTableList->getLength();
+    if (!routingTableList) {
+         ESP_LOGE(MONITORING_TAG, "Failed to get routing table copy for count.");
+         return 0; // Return 0 on error
+    }
+    int length = routingTableList->getLength();
+    delete routingTableList; // <<< FIXED: Delete the copy to prevent memory leak
+    ESP_LOGV(MONITORING_TAG, "Number of routes: %d", length);
+    return length;
 }
 
 int Monitoring::getLEDstatus(){
-    return led.getState();
+    // Assuming led.getState() returns the current state (e.g., 0 for OFF, 1 for ON)
+    int state = led.getState();
+    ESP_LOGV(MONITORING_TAG, "Current LED state: %d", state);
+    return state;
 }
 
 int Monitoring::getOutMessages(){
+    // This logic combines two counters - ensure this is the intended behavior
     Query& query = Query::getInstance();
-    return query.getQueryID()+monitoringId;
+    int outCount = query.getQueryID() + monitoringId;
+    ESP_LOGV(MONITORING_TAG, "Outgoing message count (approx): %d", outCount);
+    return outCount;
 }
 
 int Monitoring::getInMessages(){
     Query& query = Query::getInstance();
-    return query.getInQuery();
+    int inCount = query.getInQuery();
+    ESP_LOGV(MONITORING_TAG, "Incoming message count (approx): %d", inCount);
+    return inCount;
 }

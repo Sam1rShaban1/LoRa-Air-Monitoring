@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
+
 #pragma pack(1)
 
 // Message Ports
@@ -41,7 +42,7 @@ public:
     uint8_t messageId;
     uint16_t addrSrc;
     uint16_t addrDst;
-    String incomingData = "";
+    String incomingData;
     uint32_t messageSize; // Message Size of the payload, not including header
 
     uint32_t getDataMessageSize() {
@@ -53,7 +54,6 @@ public:
         doc["addrSrc"] = addrSrc;
         doc["addrDst"] = addrDst;
         doc["messageSize"] = messageSize;
-        doc["incomingData"] = incomingData;  // Serialize incomingData to "incomingData" key
     }
 
     void deserialize(JsonObject& doc) {
@@ -63,9 +63,6 @@ public:
         addrSrc = doc["addrSrc"];
         addrDst = doc["addrDst"];
         messageSize = doc["messageSize"];
-        if (doc.containsKey("incomingData")) {  // Use "incomingData" as key for deserialization
-            incomingData = doc["incomingData"].as<String>();  
-        }
     }
 };
 

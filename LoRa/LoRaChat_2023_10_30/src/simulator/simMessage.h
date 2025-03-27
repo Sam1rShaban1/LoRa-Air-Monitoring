@@ -66,8 +66,8 @@ public:
         doc["packetSize"] = packetSize;
 
         if (UPLOAD_PAYLOAD == true) {
-            JsonArray payloadArray = doc.createNestedArray("payload");
-
+            JsonArray payloadArray = doc["payload"].to<JsonArray>();
+            
             for (uint32_t i = 0; i < packetSize; i++) {
                 payloadArray.add(payload[i]);
             }

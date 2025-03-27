@@ -1,5 +1,8 @@
 #include <Arduino.h>
 
+//Json
+#include <ArduinoJson.h>
+
 //Configuration
 #include "config.h"
 
@@ -596,11 +599,11 @@ void initWire() {
 
 #ifndef PIO_UNIT_TESTING
 
+MonitoringMessage monitor;
 void setup() {
     // Initialize Serial Monitor
     Serial.begin(115200);
     Serial1.begin(9600, SERIAL_8N1, 13, 14); // Rx Pin 13, Tx Pin 14
-
 
     // Set log level
     // esp_log_level_set("*", ESP_LOG_VERBOSE);
@@ -712,31 +715,18 @@ void setup() {
 #endif
 }
 
+unsigned long lastHeapPrintTime = 0;
+
 void loop() {
-    MonitoringMessage monitor;
-    vTaskDelay(200000 / portTICK_PERIOD_MS);
-
-    Serial.printf("FREE HEAP: %d\n", ESP.getFreeHeap());
-    Serial.printf("Min, Max: %d, %d\n", ESP.getMinFreeHeap(), ESP.getMaxAllocHeap());
-
-    monitor.update();
     
-    if (Serial1.available()) {
-        Serial.println("Data available on UART1");
-        String incomingData = "";
-        
-        // Read the incoming bytes and store them in a string
-        while (Serial1.available()) {
-            char incomingByte = Serial1.read();
-            incomingData += incomingByte;
-            delay(500);
-        }
+    //monitor.update();  // Read UART and process data in update()
 
-        // Print the received data to the terminal
-        Serial.println("Received from UART1:");
-        Serial.println(incomingData);
+    // Periodic heap print
+    if (millis() - lastHeapPrintTime >= 200000) {
+        lastHeapPrintTime = millis();
+        Serial.printf("FREE HEAP: %d\n", ESP.getFreeHeap());
+        Serial.printf("Min, Max: %d, %d\n", ESP.getMinFreeHeap(), ESP.getMaxAllocHeap());
     }
-
 
 #ifdef BATTERY_ENABLED
     if (battery.getVoltagePercentage() < 20) {

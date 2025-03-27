@@ -1,7 +1,7 @@
 #pragma once
 
 // Choose the device, choose it directly in the platformio.ini file
-#define T_BEAM_V10 // ttgo-t-beam
+// #define T_BEAM_V10 // ttgo-t-beam
 // #define T_BEAM_LORA_32 // ttgo-lora32-v1
 // #define NAYAD_V1
 // #define NAYAD_V1R2
@@ -86,14 +86,14 @@
 #define MAX_CONNECTION_TRY 10
 
 // WiFi credentials
-#define WIFI_SSID "DSG_Lab"
-#define WIFI_PASSWORD "mvdsi304"
+#define WIFI_SSID "MS"
+#define WIFI_PASSWORD "12345678"
 // #define WIFI_SSID "JackHotspot"
 // #define WIFI_PASSWORD "12345678"
 
 // MQTT configurationsuod
 #define MQTT_ENABLED
-#define MQTT_SERVER "192.168.1.109" 
+#define MQTT_SERVER "34.159.44.110" 
 #define MQTT_PORT 1883
 #define MQTT_USERNAME "admin"
 #define MQTT_PASSWORD "public"
@@ -101,7 +101,7 @@
 #define MQTT_TOPIC_OUT "to-server/"
 #define MQTT_MAX_PACKET_SIZE 2048 // 025 // 128, 256 or 512
 #define MQTT_MAX_QUEUE_SIZE 10
-#define MQTT_STILL_CONNECTED_INTERVAL  90000 //30000 // In milliseconds, 0 to disable
+#define MQTT_STILL_CONNECTED_INTERVAL  30000 //90000 // In milliseconds, 0 to disable
 
 
 #if defined(BLUETOOTH_ENABLED)
@@ -132,7 +132,7 @@
 
 //Monitoring configuration
 #define MONITORING_ENABLED
-#define MONITORING_UPDATE_DELAY 90000 //30000 //10000 //ms   when periodic task
+#define MONITORING_UPDATE_DELAY 30000 //30000 //10000 //ms   when periodic task
 
 //FLKWS
 //#define FLKWS_ENABLED
